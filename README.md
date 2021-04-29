@@ -42,3 +42,9 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 ``` 
 curl localhost:9999/api/search?b=snippets&k=code&key=v.name&value=linux&shortBy=weight,desc
 ```
+- Example
+``` 
+curl --location --request POST 'http://localhost:9999/api/kv/snippets/code' \
+--header 'Content-Type: application/json' \
+--data-raw '{"name":"linux io","code":"iostat -x -t 2"}'
+```
