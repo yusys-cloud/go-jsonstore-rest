@@ -1,7 +1,7 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-25
 //
-package internal
+package rest
 
 import (
 	"github.com/gin-gonic/gin"
@@ -15,9 +15,9 @@ type JsonStoreRest struct {
 	//gin *gin.Context
 }
 
-func NewJsonStoreRest(dir string,r *gin.Engine) *JsonStoreRest {
+func NewJsonStoreRest(dir string, r *gin.Engine) *JsonStoreRest {
 
-	s:= NewStorage(dir)
+	s := NewStorage(dir)
 
 	s.ConfigHandles(r)
 
@@ -79,8 +79,8 @@ func (s *Storage) search(c *gin.Context) {
 	c.JSON(http.StatusOK, s.Search(search))
 }
 
-func (s *Storage) updateWeight(c *gin.Context)  {
-	c.JSON(http.StatusOK,s.UpdateWeight(c.Param("b"), c.Param("kid")))
+func (s *Storage) updateWeight(c *gin.Context) {
+	c.JSON(http.StatusOK, s.UpdateWeight(c.Param("b"), c.Param("kid")))
 }
 
 func (s *Storage) read(c *gin.Context) {

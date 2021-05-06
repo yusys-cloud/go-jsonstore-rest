@@ -1,7 +1,7 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-16
 //
-package internal
+package rest
 
 import (
 	"encoding/json"
@@ -93,8 +93,8 @@ func (s *Storage) Search(search Search) interface{} {
 	}
 
 	if search.ShortBy != "" {
-		sts:=strings.Split(search.ShortBy,",")
-		jq.SortBy(sts[0],sts[1])
+		sts := strings.Split(search.ShortBy, ",")
+		jq.SortBy(sts[0], sts[1])
 	} else {
 		jq.SortBy("k", "desc")
 	}
@@ -149,10 +149,10 @@ func (s *Storage) Update(bucket string, key string, value interface{}) error {
 }
 func (s *Storage) UpdateWeight(bucket string, kid string) interface{} {
 
-	d:=s.Read(bucket,kid)
+	d := s.Read(bucket, kid)
 
 	i := d.V.(map[string]interface{})
-	i["weight"]=strconv.FormatInt(time.Now().Unix(),10)
+	i["weight"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 	err := s.bucket(bucket).Set(kid, i)
 	if err != nil {

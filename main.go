@@ -6,7 +6,7 @@ package main
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
-	"github.com/yusys-cloud/go-jsonstore-rest/internal"
+	"github.com/yusys-cloud/go-jsonstore-rest/rest"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func main() {
 
 	r := gin.Default()
 
-	internal.NewJsonStoreRest(*path, r)
+	rest.NewJsonStoreRest(*path, r)
 
 	r.Use(DisableCors())
 
