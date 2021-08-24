@@ -39,7 +39,7 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 - Search
 
 ``` 
-curl localhost:9999/api/search?b=snippets&k=code&key=v.name&value=linux&shortBy=weight,desc
+curl http://localhost:9999/api/search?b=snippets&k=code&key=v.name&value=linux&shortBy=weight,desc&offset=10&limit=2
 ```
 - Example
 ``` 

@@ -35,6 +35,8 @@ type Search struct {
 	Key     string `form:"key"`
 	Value   string `form:"value"`
 	ShortBy string `form:"shortBy"`
+	Offset  int    `form:"offset"`
+	Limit   int    `form:"limit"`
 }
 
 func NewStorage(dir string) *Storage {
@@ -98,6 +100,14 @@ func (s *Storage) Search(search Search) interface{} {
 	} else {
 		jq.SortBy("k", "desc")
 	}
+	// Offset and limit
+	if search.Offset != 0 {
+		jq.Offset(search.Offset)
+	}
+	if search.Limit != 0 {
+		jq.Limit(search.Limit)
+	}
+
 	return jq.Get()
 }
 

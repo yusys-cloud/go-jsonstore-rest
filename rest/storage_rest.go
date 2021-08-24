@@ -11,7 +11,7 @@ import (
 )
 
 type JsonStoreRest struct {
-	db *Storage
+	D *Storage
 	//gin *gin.Context
 }
 
