@@ -12,9 +12,9 @@ import (
 
 func main() {
 
-	path := flag.String("path", "./json-db", "-path=./json-db")
+	path := flag.String("path", "./json-db", "--path=./json-db")
 
-	port := flag.String("port", "9999", "-port=9999")
+	port := flag.String("port", "9999", "--port=9999")
 
 	flag.Parse()
 

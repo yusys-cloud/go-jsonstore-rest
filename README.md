@@ -17,7 +17,7 @@ Startup
 Replace ./json-db with the path to the drive or directory in which you want to store data.
 
 ```
-./go-jsonstore-rest -path=./json-db -port=9999 
+./go-jsonstore-rest --path=./json-db --port=9999 
 ```
 
 ### RESTful API
