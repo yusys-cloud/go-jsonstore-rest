@@ -25,6 +25,19 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 - CRUD
 
 ``` 
+// Create
+curl localhost:9999/api/kv/meta/node -X POST -d '{"ip": "192.168.49.69","name":"redis-n1","dc":"default","lable":"Redis"}' --header "Content-Type: application/json"
+// Read
+curl localhost:9999/api/kv/meta/node
+// Update
+curl localhost:9999/api/kv/meta/node/node:1429991523109310464 -X PUT -d '{"ip": "192.168.49.69","name":"redis-n2","dc":"default","lable":"Redis"}' --header "Content-Type: application/json"
+// Delete
+curl localhost:9999/api/kv/meta/node/node:1429991523109310464 -X DELETE 
+// Search
+curl http://localhost:9999/api/search?b=snippets&k=code&key=v.name&value=linux&shortBy=weight,desc&offset=10&limit=2
+```
+
+``` 
 [GIN-debug] POST   /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (3 handlers)
 [GIN-debug] GET    /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).readAll-fm (3 handlers)
 [GIN-debug] GET    /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).read-fm (3 handlers)
@@ -35,15 +48,8 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 [GIN-debug] GET    /api/search               --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).search-fm (3 handlers)
 
 ```
+<img width="550px" src="./docs/static/crud-time-ms.jpg">
 
-- Search
-
-``` 
-curl http://localhost:9999/api/search?b=snippets&k=code&key=v.name&value=linux&shortBy=weight,desc&offset=10&limit=2
-```
-- Example
-``` 
-curl --location --request POST 'http://localhost:9999/api/kv/snippets/code' \
---header 'Content-Type: application/json' \
---data-raw '{"name":"linux io","code":"iostat -x -t 2"}'
-```
+## Benchmarks
+- BenchmarkQuery100-12    	       1	2,102,479,566 ns/op
+- BenchmarkCreate100-12    	       1	1082093859 ns/op
