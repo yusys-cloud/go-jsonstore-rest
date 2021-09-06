@@ -122,6 +122,15 @@ func (s *Storage) Read(bucket string, key string) Data {
 
 	return Data{key, f}
 }
+
+//查询单个，返回 Struct 对象
+func (s *Storage) ReadOneStruct(bucket string, key string, v interface{}) error {
+
+	error := s.bucket(bucket).Get(key, v)
+
+	return error
+}
+
 func (s *Storage) ReadOneRaw(bucket string, key string) []byte {
 
 	_, rs := s.bucket(bucket).GetRawMessage(key)
