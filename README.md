@@ -52,12 +52,10 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 - 参数 b 为存储的json文件名，类似数据库名称
 - 参数 k 为存储文件中json对象数组名，类似数据库中表名称
 
-/api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&limit=2
+/api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=2
 
 - 参数 key 为搜索json对象中字段名称
 - 参数 value 为搜索json对象字段的搜索值
-- page|offset 页码
-- limit|size 每页条数
 
 ``` 
 [GIN-debug] POST   /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (3 handlers)

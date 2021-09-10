@@ -36,9 +36,7 @@ type Search struct {
 	Key     string `form:"key"`
 	Value   string `form:"value"`
 	ShortBy string `form:"shortBy"`
-	Offset  int    `form:"offset"`
 	Page    int    `form:"page"`
-	Limit   int    `form:"limit"`
 	Size    int    `form:"size"`
 }
 
@@ -118,16 +116,10 @@ func (s *Storage) Search(search Search) *model.Response {
 	}
 	resp.Data.Total = len(jq.Get().([]interface{}))
 	// Offset and limit
-	if search.Offset != 0 {
-		jq.Offset(search.Offset - 1)
-	}
 	if search.Page != 0 {
 		jq.Offset(search.Page - 1)
 	}
 	// limit
-	if search.Limit != 0 {
-		jq.Limit(search.Limit)
-	}
 	if search.Size != 0 {
 		jq.Limit(search.Size)
 	}
