@@ -23,9 +23,10 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 ### RESTful API
 
 通用 JSON 数据操作 API
+
 Create
 ``` 
-curl localhost:9999/api/kv/meta/node -X POST -d '{"ip": "192.168.49.69","name":"redis-n1","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
+curl localhost:9999/api/kv/meta/node -X POST -d '{"ip": "192.168.x.x","name":"redis-n1","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
 ```
 Read
 ```
@@ -45,7 +46,7 @@ curl localhost:9999/api/kv/meta/node -X DELETE
 ```
 Search
 ```
-curl http://localhost:9999/api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&offset=10&limit=2
+curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&shortBy=weight,desc&offset=10&limit=2
 ```
 /api/kv/:b/:k 
 - 参数 b 为存储的json文件名，类似数据库名称

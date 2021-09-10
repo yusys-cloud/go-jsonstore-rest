@@ -99,10 +99,8 @@ func (s *Storage) ReadAllSort(bucket string, key string) *model.Response {
 func (s *Storage) Search(search Search) *model.Response {
 	resp := model.NewResponse()
 
-	all := s.ReadAll(search.B, search.K)
+	all := s.ReadAll(search.B, search.K).Data.Items
 	b, _ := json.Marshal(all)
-
-	resp.Data.Total = len(b)
 
 	jq := gojsonq.New().FromString(string(b))
 	if search.Node != "" {
@@ -118,6 +116,7 @@ func (s *Storage) Search(search Search) *model.Response {
 	} else {
 		jq.SortBy("k", "desc")
 	}
+	resp.Data.Total = len(jq.Get().([]interface{}))
 	// Offset and limit
 	if search.Offset != 0 {
 		jq.Offset(search.Offset)
