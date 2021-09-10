@@ -11,6 +11,7 @@ import (
 	"github.com/thedevsaddam/gojsonq/v2"
 	"github.com/xujiajun/utils/filesystem"
 	"github.com/yusys-cloud/go-jsonstore-rest/jsonstore"
+	"github.com/yusys-cloud/go-jsonstore-rest/model"
 	"os"
 	"regexp"
 	"strconv"
@@ -36,7 +37,9 @@ type Search struct {
 	Value   string `form:"value"`
 	ShortBy string `form:"shortBy"`
 	Offset  int    `form:"offset"`
+	Page    int    `form:"page"`
 	Limit   int    `form:"limit"`
+	Size    int    `form:"size"`
 }
 
 func NewStorage(dir string) *Storage {
@@ -65,26 +68,41 @@ func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
 }
 
 //查询bucket中 key 全部
-func (s *Storage) ReadAll(bucket string, key string) []Data {
+func (s *Storage) ReadAll(bucket string, key string) *model.Response {
+
+	resp := model.NewResponse()
 
 	rs := s.bucket(bucket).GetAll(regexp.MustCompile(key))
 
-	return convertMapToArray(rs)
+	resp.Data.Total = len(rs)
+	resp.Data.Items = convertMapToArray(rs)
+
+	return resp
 }
-func (s *Storage) ReadAllSort(bucket string, key string) interface{} {
+func (s *Storage) ReadAllSort(bucket string, key string) *model.Response {
+
+	resp := model.NewResponse()
 
 	rs := s.bucket(bucket).GetAll(regexp.MustCompile(key))
+
+	resp.Data.Total = len(rs)
 	b, _ := json.Marshal(convertMapToArray(rs))
 
 	jq := gojsonq.New().FromString(string(b))
 	jq.SortBy("k", "desc")
-	return jq.Get()
+
+	resp.Data.Items = jq.Get()
+	return resp
 }
 
 //
-func (s *Storage) Search(search Search) interface{} {
+func (s *Storage) Search(search Search) *model.Response {
+	resp := model.NewResponse()
+
 	all := s.ReadAll(search.B, search.K)
 	b, _ := json.Marshal(all)
+
+	resp.Data.Total = len(b)
 
 	jq := gojsonq.New().FromString(string(b))
 	if search.Node != "" {
@@ -104,11 +122,20 @@ func (s *Storage) Search(search Search) interface{} {
 	if search.Offset != 0 {
 		jq.Offset(search.Offset)
 	}
+	if search.Page != 0 {
+		jq.Offset(search.Page)
+	}
+	// limit
 	if search.Limit != 0 {
 		jq.Limit(search.Limit)
 	}
+	if search.Size != 0 {
+		jq.Limit(search.Size)
+	}
 
-	return jq.Get()
+	resp.Data.Items = jq.Get()
+
+	return resp
 }
 
 //查询单个
@@ -203,11 +230,11 @@ func (s *Storage) Delete(bucket string, key string) {
 }
 func (s *Storage) DeleteAll(bucket string, key string) int {
 	rs := s.ReadAll(bucket, key)
-	for _, value := range rs {
+	for _, value := range rs.Data.Items.([]Data) {
 		s.bucket(bucket).Delete(value.K)
 	}
 	s.savePersistent(bucket)
-	return len(rs)
+	return len(rs.Data.Items.([]Data))
 }
 
 func (s *Storage) savePersistent(bucket string) {
