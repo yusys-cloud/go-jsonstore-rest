@@ -9,10 +9,10 @@ type Data struct {
 }
 
 type Response struct {
-	Code string
+	Code int
 	Data *Data
 }
 
 func NewResponse() *Response {
-	return &Response{"20000", &Data{}}
+	return &Response{20000, &Data{}}
 }
