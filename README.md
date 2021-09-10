@@ -56,6 +56,8 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 
 - 参数 key 为搜索json对象中字段名称
 - 参数 value 为搜索json对象字段的搜索值
+- 参数 key 为json对象的搜索字段名称,需多层json key的完整路径值，如：v.name
+- 参数 value 为json对象字段的搜索值
 
 ``` 
 [GIN-debug] POST   /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (3 handlers)
