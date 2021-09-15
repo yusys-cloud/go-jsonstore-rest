@@ -25,10 +25,6 @@ type Storage struct {
 	idNode  *snowflake.Node
 }
 
-type Data struct {
-	K string      `json:"k"`
-	V interface{} `json:"v"`
-}
 type Search struct {
 	B       string `form:"b"`
 	K       string `form:"k"`
@@ -124,13 +120,13 @@ func (s *Storage) Search(search Search) *model.Response {
 		jq.Limit(search.Size)
 	}
 
-	resp.Data.Items = jq.Get()
+	resp.Data.Items = jq.Get().([]interface{})
 
 	return resp
 }
 
 //查询单个
-func (s *Storage) Read(bucket string, key string) Data {
+func (s *Storage) Read(bucket string, key string) model.Data {
 
 	_, rs := s.bucket(bucket).GetRawMessage(key)
 
@@ -138,7 +134,7 @@ func (s *Storage) Read(bucket string, key string) Data {
 
 	json.Unmarshal(rs, &f)
 
-	return Data{key, f}
+	return model.Data{key, f}
 }
 
 //查询单个，返回 Struct 对象
@@ -221,11 +217,24 @@ func (s *Storage) Delete(bucket string, key string) {
 }
 func (s *Storage) DeleteAll(bucket string, key string) int {
 	rs := s.ReadAll(bucket, key)
-	for _, value := range rs.Data.Items.([]Data) {
-		s.bucket(bucket).Delete(value.K)
+	return s.DeleteList(bucket, rs.Data.Items, true)
+}
+
+func (s *Storage) DeleteList(bucket string, items interface{}, isData bool) int {
+	n := 0
+	if isData {
+		for _, value := range items.([]model.Data) {
+			s.bucket(bucket).Delete(value.K)
+			n++
+		}
+	} else {
+		for _, value := range items.([]interface{}) {
+			s.bucket(bucket).Delete(value.(map[string]interface{})["k"].(string))
+			n++
+		}
 	}
 	s.savePersistent(bucket)
-	return len(rs.Data.Items.([]Data))
+	return n
 }
 
 func (s *Storage) savePersistent(bucket string) {
@@ -250,10 +259,10 @@ func mkdirIfNotExist(rootDir string) error {
 	return nil
 }
 
-func convertMapToArray(raw map[string]json.RawMessage) []Data {
-	datas := make([]Data, 0)
+func convertMapToArray(raw map[string]json.RawMessage) []model.Data {
+	datas := make([]model.Data, 0)
 	for k, v := range raw {
-		datas = append(datas, Data{k, v})
+		datas = append(datas, model.Data{k, v})
 	}
 	return datas
 }

@@ -35,6 +35,7 @@ func (s *Storage) ConfigHandles(r *gin.Engine) {
 	rg.DELETE("/:b/:k", s.deleteAll)
 	//Search
 	r.GET("/api/search", s.search)
+	r.DELETE("/api/search", s.deleteSearch)
 }
 
 func (s *Storage) create(c *gin.Context) {
@@ -79,6 +80,13 @@ func (s *Storage) search(c *gin.Context) {
 	c.JSON(http.StatusOK, s.Search(search))
 }
 
+//根据搜索内容删除
+func (s *Storage) deleteSearch(c *gin.Context) {
+	var search Search
+	c.ShouldBind(&search)
+	c.JSON(http.StatusOK, gin.H{"nums": s.DeleteList(search.B, s.Search(search).Data.Items, false)})
+}
+
 func (s *Storage) updateWeight(c *gin.Context) {
 	c.JSON(http.StatusOK, s.UpdateWeight(c.Param("b"), c.Param("kid")))
 }
@@ -100,5 +108,5 @@ func (s *Storage) deleteAll(c *gin.Context) {
 
 	i := s.DeleteAll(c.Param("b"), c.Param("k"))
 
-	c.JSON(http.StatusOK, "Delete nums:"+strconv.Itoa(i))
+	c.JSON(http.StatusOK, gin.H{"nums": strconv.Itoa(i)})
 }

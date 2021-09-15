@@ -3,16 +3,21 @@
 //
 package model
 
-type Data struct {
+type RespData struct {
 	Total int         `json:"total"`
 	Items interface{} `json:"items"`
 }
 
 type Response struct {
-	Code int   `json:"code"`
-	Data *Data `json:"data"`
+	Code int       `json:"code"`
+	Data *RespData `json:"data"`
 }
 
 func NewResponse() *Response {
-	return &Response{20000, &Data{}}
+	return &Response{20000, &RespData{}}
+}
+
+type Data struct {
+	K string      `json:"k"`
+	V interface{} `json:"v"`
 }
