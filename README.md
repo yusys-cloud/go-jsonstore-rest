@@ -54,6 +54,8 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 
 /api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=2
 
+/api/search?b=meta&k=node&key=v.name,v.lable&value=zk,zk
+
 - 参数 key 为搜索json对象中字段名称
 - 参数 value 为搜索json对象字段的搜索值
 - 参数 key 为json对象的搜索字段名称,需多层json key的完整路径值，如：v.name
@@ -70,6 +72,7 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 [GIN-debug] GET    /api/search               --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).search-fm (3 handlers)
 
 ```
+<img width="550px" src="./docs/static/json-rest-crud-costtime.jpg">
 <img width="550px" src="./docs/static/crud-time-ms.jpg">
 
 ## Benchmarks

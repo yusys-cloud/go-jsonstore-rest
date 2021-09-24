@@ -29,8 +29,8 @@ type Search struct {
 	B       string `form:"b"`
 	K       string `form:"k"`
 	Node    string `form:"node"`
-	Key     string `form:"key"`
-	Value   string `form:"value"`
+	Key     string `form:"key"`   // Search conditions key
+	Value   string `form:"value"` // Search conditions value
 	ShortBy string `form:"shortBy"`
 	Page    int    `form:"page"`
 	Size    int    `form:"size"`
@@ -100,8 +100,19 @@ func (s *Storage) Search(search Search) *model.Response {
 	if search.Node != "" {
 		jq.From(search.Node)
 	}
-	if search.Value != "" {
-		jq.WhereContains(search.Key, search.Value)
+	if search.Value != "" && search.Key != "" {
+		//Multiple conditions dynamic search
+		if strings.Contains(search.Key, ",") {
+			ks := strings.Split(search.Key, ",")
+			vs := strings.Split(search.Value, ",")
+			for i := 0; i < len(ks); i++ {
+				if ks[i] != "" && vs[i] != "" {
+					jq.WhereContains(ks[i], vs[i])
+				}
+			}
+		} else {
+			jq.WhereContains(search.Key, search.Value)
+		}
 	}
 
 	if search.ShortBy != "" {
@@ -153,7 +164,7 @@ func (s *Storage) ReadOneRaw(bucket string, key string) []byte {
 }
 
 //保存key,value. bucket类似table
-func (s *Storage) Create(bucket string, key string, value interface{}) string {
+func (s *Storage) Create(bucket string, key string, value interface{}) model.Data {
 
 	//默认自增ID
 	id := key + ":" + s.idNode.Generate().String()
@@ -165,11 +176,11 @@ func (s *Storage) Create(bucket string, key string, value interface{}) string {
 
 	s.savePersistent(bucket)
 
-	return id
+	return s.Read(bucket, id)
 }
 
 // 根据key更新
-func (s *Storage) Update(bucket string, key string, value interface{}) error {
+func (s *Storage) Update(bucket string, key string, value interface{}) model.Data {
 
 	err := s.bucket(bucket).Set(key, value)
 	if err != nil {
@@ -178,7 +189,7 @@ func (s *Storage) Update(bucket string, key string, value interface{}) error {
 
 	s.savePersistent(bucket)
 
-	return err
+	return s.Read(bucket, key)
 }
 func (s *Storage) UpdateWeight(bucket string, kid string) interface{} {
 

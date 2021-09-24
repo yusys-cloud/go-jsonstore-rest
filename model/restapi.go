@@ -17,6 +17,10 @@ func NewResponse() *Response {
 	return &Response{20000, &RespData{}}
 }
 
+func NewResponseData(data interface{}) *Response {
+	return &Response{20000, &RespData{1, data}}
+}
+
 type Data struct {
 	K string      `json:"k"`
 	V interface{} `json:"v"`

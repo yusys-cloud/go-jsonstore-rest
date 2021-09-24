@@ -6,8 +6,8 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/yusys-cloud/go-jsonstore-rest/model"
 	"net/http"
-	"strconv"
 )
 
 type JsonStoreRest struct {
@@ -41,32 +41,36 @@ func (s *Storage) ConfigHandles(r *gin.Engine) {
 func (s *Storage) create(c *gin.Context) {
 
 	var data interface{}
+	resp := model.NewResponse()
+
 	if err := c.ShouldBindJSON(&data); err != nil {
 		logrus.Error(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		resp.Code = http.StatusBadRequest
+		resp.Data.Items = "BindError:" + err.Error()
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	id := s.Create(c.Param("b"), c.Param("k"), data)
-
-	c.JSON(http.StatusOK, id)
+	resp.Data.Total = 1
+	resp.Data.Items = s.Create(c.Param("b"), c.Param("k"), data)
+	c.JSON(http.StatusOK, resp)
 }
 
 func (s *Storage) update(c *gin.Context) {
 	var data interface{}
+	resp := model.NewResponse()
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		logrus.Error(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		resp.Code = http.StatusBadRequest
+		resp.Data.Items = err.Error()
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	if err := s.Update(c.Param("b"), c.Param("kid"), data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, "ok")
+	resp.Data.Total = 1
+	resp.Data.Items = s.Update(c.Param("b"), c.Param("kid"), data)
+	c.JSON(http.StatusOK, resp)
 }
 
 func (s *Storage) readAll(c *gin.Context) {
@@ -84,29 +88,30 @@ func (s *Storage) search(c *gin.Context) {
 func (s *Storage) deleteSearch(c *gin.Context) {
 	var search Search
 	c.ShouldBind(&search)
-	c.JSON(http.StatusOK, gin.H{"nums": s.DeleteList(search.B, s.Search(search).Data.Items, false)})
+	c.JSON(http.StatusOK, model.NewResponseData(s.DeleteList(search.B, s.Search(search).Data.Items, false)))
 }
 
 func (s *Storage) updateWeight(c *gin.Context) {
-	c.JSON(http.StatusOK, s.UpdateWeight(c.Param("b"), c.Param("kid")))
+	c.JSON(http.StatusOK, model.NewResponseData(s.UpdateWeight(c.Param("b"), c.Param("kid"))))
 }
 
 func (s *Storage) read(c *gin.Context) {
 
-	kv := s.Read(c.Param("b"), c.Param("kid"))
-
-	c.JSON(http.StatusOK, kv)
+	c.JSON(http.StatusOK, model.NewResponseData(s.Read(c.Param("b"), c.Param("kid"))))
 }
 
 func (s *Storage) delete(c *gin.Context) {
 
 	s.Delete(c.Param("b"), c.Param("kid"))
 
-	c.JSON(http.StatusOK, "ok")
+	c.JSON(http.StatusOK, model.NewResponseData("success"))
 }
 func (s *Storage) deleteAll(c *gin.Context) {
 
 	i := s.DeleteAll(c.Param("b"), c.Param("k"))
 
-	c.JSON(http.StatusOK, gin.H{"nums": strconv.Itoa(i)})
+	resp := model.NewResponseData("success")
+	resp.Data.Total = i
+
+	c.JSON(http.StatusOK, resp)
 }
