@@ -111,7 +111,11 @@ func (s *Storage) Search(search Search) *model.Response {
 				}
 			}
 		} else {
-			jq.WhereContains(search.Key, search.Value)
+			if strings.Contains(search.Value, ",") {
+				jq.WhereIn(search.Key, strings.Split(search.Value, ","))
+			} else {
+				jq.WhereContains(search.Key, search.Value)
+			}
 		}
 	}
 
