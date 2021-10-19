@@ -107,12 +107,16 @@ func (s *Storage) Search(search Search) *model.Response {
 			vs := strings.Split(search.Value, ",")
 			for i := 0; i < len(ks); i++ {
 				if ks[i] != "" && vs[i] != "" {
-					jq.WhereContains(ks[i], vs[i])
+					if strings.Contains(vs[i], "|") {
+						jq.WhereIn(ks[i], strings.Split(vs[i], "|"))
+					} else {
+						jq.WhereContains(ks[i], vs[i])
+					}
 				}
 			}
 		} else {
-			if strings.Contains(search.Value, ",") {
-				jq.WhereIn(search.Key, strings.Split(search.Value, ","))
+			if strings.Contains(search.Value, "|") {
+				jq.WhereIn(search.Key, strings.Split(search.Value, "|"))
 			} else {
 				jq.WhereContains(search.Key, search.Value)
 			}

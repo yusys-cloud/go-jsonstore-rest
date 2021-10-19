@@ -20,6 +20,20 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 ./go-jsonstore-rest --path=./json-db --port=9999 
 ```
 
+### Base Codes
+```
+import "github.com/yusys-cloud/go-jsonstore-rest/rest"
+
+db:=rest.NewStorage("./chatData")
+db.Create("chat", "msg", message)
+
+```
+
+### RESTful API codes
+``` 
+
+``` 
+
 ### RESTful API
 
 通用 JSON 数据操作 API
@@ -54,7 +68,7 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 
 /api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=2
 
-/api/search?b=meta&k=node&key=v.name,v.lable&value=zk,zk
+/api/search?b=meta&k=node&key=v.name,v.lable&value=zk|zk2,zk
 
 - 参数 key 为搜索json对象中字段名称
 - 参数 value 为搜索json对象字段的搜索值
