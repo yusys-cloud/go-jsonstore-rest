@@ -36,24 +36,22 @@ func (s *Storage) ConfigHandles(r *gin.Engine) {
 	//Search
 	r.GET("/api/search", s.search)
 	r.DELETE("/api/search", s.deleteSearch)
+	//通用缓存
+	r.POST("/api/cache", s.cache)
+	r.GET("/api/cache/:key", s.cacheGet)
+
 }
 
 func (s *Storage) create(c *gin.Context) {
 
 	var data interface{}
-	resp := model.NewResponse()
-
 	if err := c.ShouldBindJSON(&data); err != nil {
 		logrus.Error(err)
-		resp.Code = http.StatusBadRequest
-		resp.Data.Items = "BindError:" + err.Error()
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, model.ResponseError("BindError:"+err.Error()))
 		return
 	}
 
-	resp.Data.Total = 1
-	resp.Data.Items = s.Create(c.Param("b"), c.Param("k"), data)
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, model.ResponseOne(s.Create(c.Param("b"), c.Param("k"), data)))
 }
 
 func (s *Storage) update(c *gin.Context) {
@@ -114,4 +112,20 @@ func (s *Storage) deleteAll(c *gin.Context) {
 	resp.Data.Total = i
 
 	c.JSON(http.StatusOK, resp)
+}
+
+//通用全局key value 缓存到bucket=meta中
+func (s *Storage) cache(c *gin.Context) {
+	var data model.Data
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusOK, model.ResponseError("BindError:"+err.Error()))
+		return
+	}
+
+	s.CachePut(data.K, data.V)
+
+	c.JSON(http.StatusOK, model.ResponseOne(data))
+}
+func (s *Storage) cacheGet(c *gin.Context) {
+	c.JSON(http.StatusOK, model.NewResponseData(s.CacheGet(c.Param("key"))))
 }

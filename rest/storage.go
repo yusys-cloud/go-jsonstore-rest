@@ -61,6 +61,16 @@ func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
 	return s.buckets[bucket]
 }
 
+func (s *Storage) CachePut(key string, val interface{}) {
+	s.bucket("meta").Set("b-c-"+key, val)
+	s.savePersistent("meta")
+}
+func (s *Storage) CacheGet(key string) interface{} {
+	var v interface{}
+	s.bucket("meta").Get("b-c-"+key, &v)
+	return &model.Data{key, v}
+}
+
 //查询bucket中 key 全部
 func (s *Storage) ReadAll(bucket string, key string) *model.Response {
 

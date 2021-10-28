@@ -3,6 +3,8 @@
 //
 package model
 
+import "net/http"
+
 type RespData struct {
 	Total int         `json:"total"`
 	Items interface{} `json:"items"`
@@ -19,6 +21,20 @@ func NewResponse() *Response {
 
 func NewResponseData(data interface{}) *Response {
 	return &Response{20000, &RespData{1, data}}
+}
+
+func ResponseError(err string) *Response {
+	resp := NewResponse()
+	resp.Code = http.StatusBadRequest
+	resp.Data.Items = err
+	return resp
+}
+
+func ResponseOne(item interface{}) *Response {
+	resp := NewResponse()
+	resp.Data.Items = item
+	resp.Data.Total = 1
+	return resp
 }
 
 type Data struct {
