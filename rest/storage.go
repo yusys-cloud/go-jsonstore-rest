@@ -73,7 +73,7 @@ func (s *Storage) CachePut(key string, val interface{}) {
 func (s *Storage) CacheGet(key string) interface{} {
 	var v interface{}
 	s.bucket(CACHE_BUCKET).Get("b-c-"+key, &v)
-	return &model.Data{key, v}
+	return v
 }
 func (s *Storage) FIFO(key string, val interface{}, size int) {
 	resp := s.ReadAllSort(CACHE_BUCKET, key)
