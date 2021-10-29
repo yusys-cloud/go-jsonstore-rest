@@ -19,6 +19,11 @@ Replace ./json-db with the path to the drive or directory in which you want to s
 ```
 ./go-jsonstore-rest --path=./json-db --port=9999 
 ```
+## Installation
+``` 
+go get github.com/yusys-cloud/go-jsonstore-rest
+```
+## Usage
 
 ### Base Codes
 ```
@@ -34,9 +39,22 @@ db.Create("chat", "msg", message)
 
 ``` 
 
-### RESTful API
-
-通用 JSON 数据操作 API
+## RESTful API
+- key:value store/cache
+``` 
+curl localhost:9999/api/cache -X POST -d '{"k":"k1","v":"hellow world"}'
+```
+``` 
+curl localhost:9999/api/cache/k1
+```
+- First In, First Out (FIFO)
+``` 
+curl 'localhost:9999/api/fifo?size=10' -X POST -d '{"k":"key1","v":"hellow world"}'
+```
+``` 
+curl localhost:9999/api/kv/meta/key1
+```
+- RESTful JSON DATASTORE
 
 Create
 ``` 

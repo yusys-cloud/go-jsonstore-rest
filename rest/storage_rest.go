@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yusys-cloud/go-jsonstore-rest/model"
 	"net/http"
+	"strconv"
 )
 
 type JsonStoreRest struct {
@@ -39,6 +40,7 @@ func (s *Storage) ConfigHandles(r *gin.Engine) {
 	//通用缓存
 	r.POST("/api/cache", s.cache)
 	r.GET("/api/cache/:key", s.cacheGet)
+	r.POST("/api/fifo", s.fifo)
 
 }
 
@@ -128,4 +130,18 @@ func (s *Storage) cache(c *gin.Context) {
 }
 func (s *Storage) cacheGet(c *gin.Context) {
 	c.JSON(http.StatusOK, model.NewResponseData(s.CacheGet(c.Param("key"))))
+}
+
+func (s *Storage) fifo(c *gin.Context) {
+	var data model.Data
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusOK, model.ResponseError("BindError:"+err.Error()))
+		return
+	}
+
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+
+	s.FIFO(data.K, data.V, size)
+
+	c.JSON(http.StatusOK, model.ResponseOne(data))
 }

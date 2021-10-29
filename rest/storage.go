@@ -36,6 +36,10 @@ type Search struct {
 	Size    int    `form:"size"`
 }
 
+const (
+	CACHE_BUCKET string = "meta"
+)
+
 func NewStorage(dir string) *Storage {
 	log.Println("Init JSON storage...", dir)
 	//create dir
@@ -61,14 +65,22 @@ func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
 	return s.buckets[bucket]
 }
 
+//通用 key：value 存储
 func (s *Storage) CachePut(key string, val interface{}) {
-	s.bucket("meta").Set("b-c-"+key, val)
-	s.savePersistent("meta")
+	s.bucket(CACHE_BUCKET).Set("b-c-"+key, val)
+	s.savePersistent(CACHE_BUCKET)
 }
 func (s *Storage) CacheGet(key string) interface{} {
 	var v interface{}
-	s.bucket("meta").Get("b-c-"+key, &v)
+	s.bucket(CACHE_BUCKET).Get("b-c-"+key, &v)
 	return &model.Data{key, v}
+}
+func (s *Storage) FIFO(key string, val interface{}, size int) {
+	resp := s.ReadAllSort(CACHE_BUCKET, key)
+	if resp.Data.Total >= size {
+		s.Delete(CACHE_BUCKET, resp.Data.Items.([]interface{})[size-1].(map[string]interface{})["k"].(string))
+	}
+	s.Create(CACHE_BUCKET, key, val)
 }
 
 //查询bucket中 key 全部
