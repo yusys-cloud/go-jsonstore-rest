@@ -70,10 +70,14 @@ func (s *Storage) CachePut(key string, val interface{}) {
 	s.bucket(CACHE_BUCKET).Set("b-c-"+key, val)
 	s.savePersistent(CACHE_BUCKET)
 }
-func (s *Storage) CacheGet(key string) interface{} {
-	var v interface{}
-	s.bucket(CACHE_BUCKET).Get("b-c-"+key, &v)
-	return v
+func (s *Storage) CacheGet(key string, val *interface{}) {
+	var rs interface{}
+	s.bucket(CACHE_BUCKET).Get("b-c-"+key, &rs)
+
+	if rs != nil {
+		body, _ := json.Marshal(rs)
+		json.Unmarshal(body, val)
+	}
 }
 func (s *Storage) FIFO(key string, val interface{}, size int) {
 	resp := s.ReadAllSort(CACHE_BUCKET, key)

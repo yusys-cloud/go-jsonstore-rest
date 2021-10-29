@@ -129,7 +129,9 @@ func (s *Storage) cache(c *gin.Context) {
 	c.JSON(http.StatusOK, model.ResponseOne(data))
 }
 func (s *Storage) cacheGet(c *gin.Context) {
-	c.JSON(http.StatusOK, model.NewResponseData(s.CacheGet(c.Param("key"))))
+	var b interface{}
+	s.CacheGet(c.Param("key"), &b)
+	c.JSON(http.StatusOK, model.NewResponseData(b))
 }
 
 func (s *Storage) fifo(c *gin.Context) {
