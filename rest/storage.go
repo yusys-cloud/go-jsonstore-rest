@@ -158,7 +158,7 @@ func (s *Storage) Search(search Search) *model.Response {
 	resp.Data.Total = len(jq.Get().([]interface{}))
 	// Offset and limit
 	if search.Page != 0 {
-		jq.Offset(search.Page - 1)
+		jq.Offset((search.Page - 1) * search.Size)
 	}
 	// limit
 	if search.Size != 0 {
