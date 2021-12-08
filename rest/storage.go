@@ -136,7 +136,7 @@ func (s *Storage) Search(search Search) *model.Response {
 					if strings.Contains(vs[i], "|") {
 						jq.WhereIn(ks[i], strings.Split(vs[i], "|"))
 					} else {
-						jq.WhereContains(ks[i], vs[i])
+						jq.WhereEqual(ks[i], vs[i])
 					}
 				}
 			}
@@ -144,7 +144,7 @@ func (s *Storage) Search(search Search) *model.Response {
 			if strings.Contains(search.Value, "|") {
 				jq.WhereIn(search.Key, strings.Split(search.Value, "|"))
 			} else {
-				jq.WhereContains(search.Key, search.Value)
+				jq.WhereEqual(search.Key, search.Value)
 			}
 		}
 	}
@@ -168,6 +168,20 @@ func (s *Storage) Search(search Search) *model.Response {
 	resp.Data.Items = jq.Get().([]interface{})
 
 	return resp
+}
+
+func (s *Storage) SearchStruct(search Search, obj interface{}) *model.Response {
+
+	rs := s.Search(search)
+
+	for _, item := range rs.Data.Items.([]interface{}) {
+		in := item.(map[string]interface{})["v"].(map[string]interface{})
+		jsonbody, _ := json.Marshal(in)
+		json.Unmarshal(jsonbody, &obj)
+		item.(map[string]interface{})["v"] = obj
+	}
+
+	return rs
 }
 
 //查询单个
