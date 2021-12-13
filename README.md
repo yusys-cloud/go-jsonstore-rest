@@ -86,11 +86,12 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 
 /api/search?b=node&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=2
 
-/api/search?b=meta&k=node&key=v.name,v.lable&value=zk|zk2,zk
+/api/search?b=meta&k=node&key=v.name,v.lable&value=zk|zk2,zk&relation=like
 
 - 参数 key 为搜索json对象中字段名称
 - 参数 value 为搜索json对象字段的搜索值
 - 参数 key 为json对象的搜索字段名称,需多层json key的完整路径值，如：v.name
+- 参数 relation 为查询关系，默认为equal精准查询，可选like模糊查询
 - 参数 value 为json对象字段的搜索值
 
 ``` 

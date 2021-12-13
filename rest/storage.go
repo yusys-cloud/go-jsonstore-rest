@@ -26,14 +26,15 @@ type Storage struct {
 }
 
 type Search struct {
-	B       string `form:"b"`
-	K       string `form:"k"`
-	Node    string `form:"node"`
-	Key     string `form:"key"`   // Search conditions key
-	Value   string `form:"value"` // Search conditions value
-	ShortBy string `form:"shortBy"`
-	Page    int    `form:"page"`
-	Size    int    `form:"size"`
+	B        string `form:"b"`
+	K        string `form:"k"`
+	Node     string `form:"node"`
+	Key      string `form:"key"`      // Search conditions key
+	Value    string `form:"value"`    // Search conditions value
+	Relation string `form:"relation"` // Search relation,default equal; equal,like
+	ShortBy  string `form:"shortBy"`
+	Page     int    `form:"page"`
+	Size     int    `form:"size"`
 }
 
 const (
@@ -136,7 +137,11 @@ func (s *Storage) Search(search Search) *model.Response {
 					if strings.Contains(vs[i], "|") {
 						jq.WhereIn(ks[i], strings.Split(vs[i], "|"))
 					} else {
-						jq.WhereEqual(ks[i], vs[i])
+						if search.Relation == "like" {
+							jq.WhereContains(ks[i], vs[i])
+						} else {
+							jq.WhereEqual(ks[i], vs[i])
+						}
 					}
 				}
 			}
@@ -144,7 +149,11 @@ func (s *Storage) Search(search Search) *model.Response {
 			if strings.Contains(search.Value, "|") {
 				jq.WhereIn(search.Key, strings.Split(search.Value, "|"))
 			} else {
-				jq.WhereEqual(search.Key, search.Value)
+				if search.Relation == "like" {
+					jq.WhereContains(search.Key, search.Value)
+				} else {
+					jq.WhereEqual(search.Key, search.Value)
+				}
 			}
 		}
 	}
