@@ -1,0 +1,8 @@
+version: '3'
+services:
+  ai-tools:
+    image: yusyscloud/go-jsonstore-rest
+    volumes:
+      - /Users/zqy/codes/yusys-cloud/go-jsonstore-rest/json-db:/json-db
+    ports:
+      - 9003:9999
