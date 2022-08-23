@@ -20,9 +20,9 @@ func main() {
 
 	r := gin.Default()
 
-	rest.NewJsonStoreRest(*path, r)
-
 	r.Use(DisableCors())
+
+	rest.NewJsonStoreRest(*path, r)
 
 	r.Run(":" + *port)
 }
