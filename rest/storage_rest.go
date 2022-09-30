@@ -1,6 +1,5 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-25
-//
 package rest
 
 import (
@@ -41,7 +40,6 @@ func (s *Storage) ConfigHandles(r *gin.Engine) {
 	r.POST("/api/cache", s.cache)
 	r.GET("/api/cache/:key", s.cacheGet)
 	r.POST("/api/fifo", s.fifo)
-
 }
 
 func (s *Storage) create(c *gin.Context) {
@@ -84,7 +82,7 @@ func (s *Storage) search(c *gin.Context) {
 	c.JSON(http.StatusOK, s.Search(search))
 }
 
-//根据搜索内容删除
+// 根据搜索内容删除
 func (s *Storage) deleteSearch(c *gin.Context) {
 	var search Search
 	c.ShouldBind(&search)
@@ -116,7 +114,7 @@ func (s *Storage) deleteAll(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//通用全局key value 缓存到bucket=meta中
+// 通用全局key value 缓存到bucket=meta中
 func (s *Storage) cache(c *gin.Context) {
 	var data model.Data
 	if err := c.ShouldBindJSON(&data); err != nil {

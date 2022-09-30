@@ -27,17 +27,18 @@ go get github.com/yusys-cloud/go-jsonstore-rest
 
 ### Base Codes
 ```
-import "github.com/yusys-cloud/go-jsonstore-rest/rest"
-
-db:=rest.NewStorage("./chatData")
-db.Create("chat", "msg", message)
-
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/yusys-cloud/go-jsonstore-rest/rest"
+	"net/http"
+)
+func main() {
+	r := gin.Default()
+	//REST-APIs-json
+	rest.NewJsonStoreRest("./api-data", r)
+	r.Run(":9991")
+}
 ```
-
-### RESTful API codes
-``` 
-
-``` 
 
 ## RESTful API
 - key:value store/cache

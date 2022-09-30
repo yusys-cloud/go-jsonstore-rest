@@ -9,5 +9,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/xujiajun/utils v0.0.0-20190123093513-8bf096c4f53b
+	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

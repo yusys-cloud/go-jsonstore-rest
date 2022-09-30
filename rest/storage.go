@@ -1,6 +1,5 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-16
-//
 package rest
 
 import (
@@ -22,7 +21,7 @@ import (
 type Storage struct {
 	buckets map[string]*jsonstore.JSONStore
 	dir     string
-	idNode  *snowflake.Node
+	IdNode  *snowflake.Node
 }
 
 type Search struct {
@@ -48,7 +47,7 @@ func NewStorage(dir string) *Storage {
 
 	node, _ := snowflake.NewNode(1)
 
-	return &Storage{buckets: make(map[string]*jsonstore.JSONStore), dir: dir, idNode: node}
+	return &Storage{buckets: make(map[string]*jsonstore.JSONStore), dir: dir, IdNode: node}
 }
 
 func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
@@ -66,7 +65,7 @@ func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
 	return s.buckets[bucket]
 }
 
-//通用 key：value 存储
+// 通用 key：value 存储
 func (s *Storage) CachePut(key string, val interface{}) {
 	s.bucket(CACHE_BUCKET).Set("b-c-"+key, val)
 	s.savePersistent(CACHE_BUCKET)
@@ -88,7 +87,7 @@ func (s *Storage) FIFO(key string, val interface{}, size int) {
 	s.Create(CACHE_BUCKET, key, val)
 }
 
-//查询bucket中 key 全部
+// 查询bucket中 key 全部
 func (s *Storage) ReadAll(bucket string, key string) *model.Response {
 
 	resp := model.NewResponse()
@@ -116,7 +115,6 @@ func (s *Storage) ReadAllSort(bucket string, key string) *model.Response {
 	return resp
 }
 
-//
 func (s *Storage) Search(search Search) *model.Response {
 	resp := model.NewResponse()
 
@@ -193,7 +191,7 @@ func (s *Storage) SearchStruct(search Search, obj interface{}) *model.Response {
 	return rs
 }
 
-//查询单个
+// 查询单个
 func (s *Storage) Read(bucket string, key string) model.Data {
 
 	_, rs := s.bucket(bucket).GetRawMessage(key)
@@ -205,7 +203,7 @@ func (s *Storage) Read(bucket string, key string) model.Data {
 	return model.Data{key, f}
 }
 
-//查询单个，返回 Struct 对象
+// 查询单个，返回 Struct 对象
 func (s *Storage) ReadOneStruct(bucket string, key string, v interface{}) error {
 
 	error := s.bucket(bucket).Get(key, v)
@@ -220,15 +218,15 @@ func (s *Storage) ReadOneRaw(bucket string, key string) []byte {
 	return rs
 }
 
-//保存key,value. bucket类似table
+// 保存key,value. bucket类似table
 func (s *Storage) Create(bucket string, key string, value interface{}) model.Data {
 
 	//默认自增ID
-	id := key + ":" + s.idNode.Generate().String()
+	id := key + ":" + s.IdNode.Generate().String()
 
 	err := s.bucket(bucket).Set(id, value)
 	if err != nil {
-		panic(err)
+		log.Error(err.Error())
 	}
 
 	s.savePersistent(bucket)
@@ -241,7 +239,7 @@ func (s *Storage) Update(bucket string, key string, value interface{}) model.Dat
 
 	err := s.bucket(bucket).Set(key, value)
 	if err != nil {
-		panic(err)
+		log.Error(err.Error())
 	}
 
 	s.savePersistent(bucket)
@@ -257,7 +255,7 @@ func (s *Storage) UpdateWeight(bucket string, kid string) interface{} {
 
 	err := s.bucket(bucket).Set(kid, i)
 	if err != nil {
-		panic(err)
+		log.Error(err.Error())
 	}
 
 	s.savePersistent(bucket)
@@ -268,7 +266,7 @@ func (s *Storage) UpdateMarshalValue(bucket string, key string, value []byte) er
 
 	err := s.bucket(bucket).SetMarshalValue(key, value)
 	if err != nil {
-		panic(err)
+		log.Error(err.Error())
 	}
 
 	s.savePersistent(bucket)
@@ -309,7 +307,6 @@ func (s *Storage) savePersistent(bucket string) {
 	// Saving will automatically gzip if .gz is provided
 	if err := jsonstore.Save(s.bucket(bucket), s.getFileName(bucket)); err != nil {
 		log.Error(err)
-		panic(err)
 	}
 }
 
