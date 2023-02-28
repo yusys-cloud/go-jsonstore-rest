@@ -1,11 +1,11 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-09-02
-//
 package main
 
 import (
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -25,7 +25,7 @@ func BenchmarkCreate100(b *testing.B) {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			log.Println(err.Error())
 		}
 		defer resp.Body.Close()
 	}
@@ -38,7 +38,8 @@ func BenchmarkQuery100(b *testing.B) {
 	for i := 1; i < 100; i++ {
 		resp, err := http.Get(url)
 		if err != nil {
-			panic(err)
+			log.Error(err.Error())
+			continue
 		}
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)

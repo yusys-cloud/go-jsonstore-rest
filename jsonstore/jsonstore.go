@@ -1,6 +1,5 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-30
-//
 package jsonstore
 
 import (
@@ -32,7 +31,7 @@ type JSONStore struct {
 func Open(filename string) (*JSONStore, error) {
 	var err error
 	f, err := os.Open(filename)
-	defer f.Close()
+	//defer f.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +72,7 @@ func Save(ks *JSONStore, filename string) (err error) {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	//defer f.Close()
 	if strings.HasSuffix(filename, ".gz") {
 		w := gzip.NewWriter(f)
 		defer w.Close()

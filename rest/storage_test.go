@@ -1,11 +1,11 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-11-24
-//
 package rest
 
 import (
 	"fmt"
 	"github.com/yusys-cloud/go-jsonstore-rest/model"
+	"log"
 	"testing"
 )
 
@@ -42,4 +42,14 @@ func TestStorage_DeleteAll(t *testing.T) {
 type Test struct {
 	Id   string
 	Name string
+}
+
+func TestStorage_CacheGetString(t *testing.T) {
+
+	storage.CachePutString("c-s", "s-path2", "93")
+
+	if storage.CacheGetString("c-s", "s-path2") != "93" {
+		t.Error("CacheGetString error,put 91 ")
+	}
+	log.Println(storage.CacheGetString("c-s", "s-path"))
 }

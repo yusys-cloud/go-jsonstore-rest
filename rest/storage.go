@@ -14,7 +14,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -65,28 +64,6 @@ func (s *Storage) bucket(bucket string) *jsonstore.JSONStore {
 	return s.buckets[bucket]
 }
 
-// 通用 key：value 存储
-func (s *Storage) CachePut(key string, val interface{}) {
-	s.bucket(CACHE_BUCKET).Set("b-c-"+key, val)
-	s.savePersistent(CACHE_BUCKET)
-}
-func (s *Storage) CacheGet(key string, val *interface{}) {
-	var rs interface{}
-	s.bucket(CACHE_BUCKET).Get("b-c-"+key, &rs)
-
-	if rs != nil {
-		body, _ := json.Marshal(rs)
-		json.Unmarshal(body, val)
-	}
-}
-func (s *Storage) FIFO(key string, val interface{}, size int) {
-	resp := s.ReadAllSort(CACHE_BUCKET, key)
-	if resp.Data.Total >= size {
-		s.Delete(CACHE_BUCKET, resp.Data.Items.([]interface{})[size-1].(map[string]interface{})["k"].(string))
-	}
-	s.Create(CACHE_BUCKET, key, val)
-}
-
 // 查询bucket中 key 全部
 func (s *Storage) ReadAll(bucket string, key string) *model.Response {
 
@@ -113,82 +90,6 @@ func (s *Storage) ReadAllSort(bucket string, key string) *model.Response {
 
 	resp.Data.Items = jq.Get()
 	return resp
-}
-
-func (s *Storage) Search(search Search) *model.Response {
-	resp := model.NewResponse()
-
-	all := s.ReadAll(search.B, search.K).Data.Items
-	b, _ := json.Marshal(all)
-
-	jq := gojsonq.New().FromString(string(b))
-	if search.Node != "" {
-		jq.From(search.Node)
-	}
-	if search.Value != "" && search.Key != "" {
-		//Multiple conditions dynamic search
-		if strings.Contains(search.Key, ",") {
-			ks := strings.Split(search.Key, ",")
-			vs := strings.Split(search.Value, ",")
-			for i := 0; i < len(ks); i++ {
-				if ks[i] != "" && vs[i] != "" {
-					if strings.Contains(vs[i], "|") {
-						jq.WhereIn(ks[i], strings.Split(vs[i], "|"))
-					} else {
-						if search.Relation == "like" {
-							jq.WhereContains(ks[i], vs[i])
-						} else {
-							jq.WhereEqual(ks[i], vs[i])
-						}
-					}
-				}
-			}
-		} else {
-			if strings.Contains(search.Value, "|") {
-				jq.WhereIn(search.Key, strings.Split(search.Value, "|"))
-			} else {
-				if search.Relation == "like" {
-					jq.WhereContains(search.Key, search.Value)
-				} else {
-					jq.WhereEqual(search.Key, search.Value)
-				}
-			}
-		}
-	}
-
-	if search.ShortBy != "" {
-		sts := strings.Split(search.ShortBy, ",")
-		jq.SortBy(sts[0], sts[1])
-	} else {
-		jq.SortBy("k", "desc")
-	}
-	resp.Data.Total = len(jq.Get().([]interface{}))
-	// Offset and limit
-	if search.Page != 0 {
-		jq.Offset((search.Page - 1) * search.Size)
-	}
-	// limit
-	if search.Size != 0 {
-		jq.Limit(search.Size)
-	}
-
-	resp.Data.Items = jq.Get().([]interface{})
-
-	return resp
-}
-
-func (s *Storage) SearchStruct(search Search, obj interface{}) *model.Response {
-
-	rs := s.Search(search)
-
-	for _, item := range rs.Data.Items.([]interface{}) {
-		in := item.(map[string]interface{})["v"].(map[string]interface{})
-		jsonbody, _ := json.Marshal(in)
-		json.Unmarshal(jsonbody, &obj)
-		item.(map[string]interface{})["v"] = obj
-	}
-
-	return rs
 }
 
 // 查询单个
