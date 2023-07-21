@@ -46,8 +46,8 @@ func (s *Storage) CacheGetString(category string, kvKey string) string {
 
 func (s *Storage) FIFO(key string, val interface{}, size int) {
 	resp := s.ReadAllSort(CACHE_BUCKET, key)
-	if resp.Data.Total >= size {
-		s.Delete(CACHE_BUCKET, resp.Data.Items.([]interface{})[size-1].(map[string]interface{})["k"].(string))
+	if resp.Total >= size {
+		s.Delete(CACHE_BUCKET, resp.Items.([]interface{})[size-1].(map[string]interface{})["k"].(string))
 	}
 	s.Create(CACHE_BUCKET, key, val)
 }

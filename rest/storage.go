@@ -71,8 +71,8 @@ func (s *Storage) ReadAll(bucket string, key string) *model.Response {
 
 	rs := s.bucket(bucket).GetAll(regexp.MustCompile(key))
 
-	resp.Data.Total = len(rs)
-	resp.Data.Items = convertMapToArray(rs)
+	resp.Total = len(rs)
+	resp.Items = convertMapToArray(rs)
 
 	return resp
 }
@@ -82,26 +82,30 @@ func (s *Storage) ReadAllSort(bucket string, key string) *model.Response {
 
 	rs := s.bucket(bucket).GetAll(regexp.MustCompile(key))
 
-	resp.Data.Total = len(rs)
+	resp.Total = len(rs)
 	b, _ := json.Marshal(convertMapToArray(rs))
 
 	jq := gojsonq.New().FromString(string(b))
 	jq.SortBy("k", "desc")
 
-	resp.Data.Items = jq.Get()
+	resp.Items = jq.Get()
 	return resp
 }
 
 // 查询单个
-func (s *Storage) Read(bucket string, key string) model.Data {
+func (s *Storage) Read(bucket string, key string) *model.Data {
 
 	_, rs := s.bucket(bucket).GetRawMessage(key)
+
+	if rs == nil {
+		return nil
+	}
 
 	var f interface{}
 
 	json.Unmarshal(rs, &f)
 
-	return model.Data{key, f}
+	return &model.Data{key, f}
 }
 
 // 查询单个，返回 Struct 对象
@@ -120,7 +124,7 @@ func (s *Storage) ReadOneRaw(bucket string, key string) []byte {
 }
 
 // 保存key,value. bucket类似table
-func (s *Storage) Create(bucket string, key string, value interface{}) model.Data {
+func (s *Storage) Create(bucket string, key string, value interface{}) *model.Data {
 
 	//默认自增ID
 	id := key + ":" + s.IdNode.Generate().String()
@@ -136,7 +140,12 @@ func (s *Storage) Create(bucket string, key string, value interface{}) model.Dat
 }
 
 // 根据key更新
-func (s *Storage) Update(bucket string, key string, value interface{}) model.Data {
+func (s *Storage) Update(bucket string, key string, value interface{}) *model.Data {
+
+	old := s.Read(bucket, key)
+	if old == nil {
+		return nil
+	}
 
 	err := s.bucket(bucket).Set(key, value)
 	if err != nil {
@@ -184,7 +193,7 @@ func (s *Storage) Delete(bucket string, key string) {
 }
 func (s *Storage) DeleteAll(bucket string, key string) int {
 	rs := s.ReadAll(bucket, key)
-	return s.DeleteList(bucket, rs.Data.Items, true)
+	return s.DeleteList(bucket, rs.Items, true)
 }
 
 func (s *Storage) DeleteList(bucket string, items interface{}, isData bool) int {

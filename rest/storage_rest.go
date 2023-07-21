@@ -25,7 +25,7 @@ func NewJsonStoreRest(dir string, r *gin.Engine) *JsonStoreRest {
 }
 
 func (s *Storage) ConfigHandles(r *gin.Engine) {
-	rg := r.Group("/api/kv")
+	rg := r.Group("/kv")
 	rg.POST("/:b/:k", s.create)
 	rg.GET("/:b/:k", s.readAll)
 	rg.GET("/:b/:k/:kid", s.read)
@@ -51,7 +51,7 @@ func (s *Storage) create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, model.ResponseOne(s.Create(c.Param("b"), c.Param("k"), data)))
+	c.JSON(http.StatusOK, model.ResponseOne(s.Create(c.Param("b"), c.Param("k"), data)).FormatKV())
 }
 
 func (s *Storage) update(c *gin.Context) {
@@ -60,33 +60,31 @@ func (s *Storage) update(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		logrus.Error(err)
-		resp.Code = http.StatusBadRequest
-		resp.Data.Items = err.Error()
-		c.JSON(http.StatusOK, resp)
+		//resp.Code = http.StatusBadRequest
+		resp.Items = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
-
-	resp.Data.Total = 1
-	resp.Data.Items = s.Update(c.Param("b"), c.Param("kid"), data)
-	c.JSON(http.StatusOK, resp)
+	resp.Items = s.Update(c.Param("b"), c.Param("kid"), data)
+	c.JSON(http.StatusOK, resp.FormatKV())
 }
 
 func (s *Storage) readAll(c *gin.Context) {
 	b := s.ReadAllSort(c.Param("b"), c.Param("k"))
-	c.JSON(http.StatusOK, b)
+	c.JSON(http.StatusOK, b.FormatKV())
 }
 
 func (s *Storage) search(c *gin.Context) {
 	var search Search
 	c.ShouldBind(&search)
-	c.JSON(http.StatusOK, s.Search(search))
+	c.JSON(http.StatusOK, s.Search(search).FormatKV())
 }
 
 // 根据搜索内容删除
 func (s *Storage) deleteSearch(c *gin.Context) {
 	var search Search
 	c.ShouldBind(&search)
-	c.JSON(http.StatusOK, model.NewResponseData(s.DeleteList(search.B, s.Search(search).Data.Items, false)))
+	c.JSON(http.StatusOK, model.NewResponseData(s.DeleteList(search.B, s.Search(search).Items, false)))
 }
 
 func (s *Storage) updateWeight(c *gin.Context) {
@@ -95,7 +93,7 @@ func (s *Storage) updateWeight(c *gin.Context) {
 
 func (s *Storage) read(c *gin.Context) {
 
-	c.JSON(http.StatusOK, model.NewResponseData(s.Read(c.Param("b"), c.Param("kid"))))
+	c.JSON(http.StatusOK, model.NewResponseData(s.Read(c.Param("b"), c.Param("kid"))).FormatKV())
 }
 
 func (s *Storage) delete(c *gin.Context) {
@@ -109,7 +107,7 @@ func (s *Storage) deleteAll(c *gin.Context) {
 	i := s.DeleteAll(c.Param("b"), c.Param("k"))
 
 	resp := model.NewResponseData("success")
-	resp.Data.Total = i
+	resp.Total = i
 
 	c.JSON(http.StatusOK, resp)
 }

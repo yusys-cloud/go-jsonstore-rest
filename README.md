@@ -1,6 +1,9 @@
 # Go-Jsonstore-Rest
 
-A quick and easy way to setup a RESTful JSON DATASTORE server for small projects.
+This is a plug-and-play JSON file storage REST API service. It offers a simple way to create, read, update, and delete 
+JSON data without the need for an additional database. You can interact with this service by sending HTTP requests, and 
+it will store the provided JSON data in files and respond with appropriate results based on the requests. This service is 
+particularly suitable for small-scale applications or prototyping, enabling you to quickly set up a REST API environment with data storage support.
 
 ## Quick Start
 
@@ -53,35 +56,35 @@ curl localhost:9999/api/cache/k1
 curl 'localhost:9999/api/fifo?size=10' -X POST -d '{"k":"key1","v":"hellow world"}'
 ```
 ``` 
-curl localhost:9999/api/kv/meta/key1
+curl localhost:9999/kv/meta/key1
 ```
 - RESTful JSON DATASTORE
 
 Create
 ``` 
-curl localhost:9999/api/kv/meta/node -X POST -d '{"ip": "192.168.x.x","name":"redis-n1","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
+curl localhost:9999/kv/meta/node -X POST -d '{"ip": "192.168.x.x","name":"redis-n1","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
 ```
 Read
 ```
-curl localhost:9999/api/kv/meta/node
+curl localhost:9999/kv/meta/node
 ```
 Update
 ```
-curl localhost:9999/api/kv/meta/node/node:1429991523109310464 -X PUT -d '{"ip": "192.168.49.69","name":"redis-n2","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
+curl localhost:9999/kv/meta/node/node:1429991523109310464 -X PUT -d '{"ip": "192.168.49.69","name":"redis-n2","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
 ```
 Delete
 ```
-curl localhost:9999/api/kv/meta/node/node:1429991523109310464 -X DELETE
+curl localhost:9999/kv/meta/node/node:1429991523109310464 -X DELETE
 ```
 Delete All
 ```
-curl localhost:9999/api/kv/meta/node -X DELETE
+curl localhost:9999/kv/meta/node -X DELETE
 ```
 Search
 ```
-curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=10
+curl http://localhost:9999/search?b=meta&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=10
 ```
-/api/kv/:b/:k 
+/kv/:b/:k 
 - 参数 b 为存储的json文件名，类似数据库名称
 - 参数 k 为存储文件中json对象数组名，类似数据库中表名称
 
@@ -96,14 +99,18 @@ curl http://localhost:9999/api/search?b=meta&k=node&key=v.name&value=linux&short
 - 参数 value 为json对象字段的搜索值
 
 ``` 
-[GIN-debug] POST   /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (3 handlers)
-[GIN-debug] GET    /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).readAll-fm (3 handlers)
-[GIN-debug] GET    /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).read-fm (3 handlers)
-[GIN-debug] PUT    /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).update-fm (3 handlers)
-[GIN-debug] PUT    /api/kv/:b/:k/:kid/weight --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).updateWeight-fm (3 handlers)
-[GIN-debug] DELETE /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).delete-fm (3 handlers)
-[GIN-debug] DELETE /api/kv/:b/:k             --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).deleteAll-fm (3 handlers)
-[GIN-debug] GET    /api/search               --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).search-fm (3 handlers)
+[GIN-debug] POST   /kv/:b/:k                 --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (4 handlers)
+[GIN-debug] GET    /kv/:b/:k                 --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).readAll-fm (4 handlers)
+[GIN-debug] GET    /kv/:b/:k/:kid            --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).read-fm (4 handlers)
+[GIN-debug] PUT    /kv/:b/:k/:kid            --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).update-fm (4 handlers)
+[GIN-debug] PUT    /kv/:b/:k/:kid/weight     --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).updateWeight-fm (4 handlers)
+[GIN-debug] DELETE /kv/:b/:k/:kid            --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).delete-fm (4 handlers)
+[GIN-debug] DELETE /kv/:b/:k                 --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).deleteAll-fm (4 handlers)
+[GIN-debug] GET    /api/search               --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).search-fm (4 handlers)
+[GIN-debug] DELETE /api/search               --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).deleteSearch-fm (4 handlers)
+[GIN-debug] POST   /api/cache                --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).cache-fm (4 handlers)
+[GIN-debug] GET    /api/cache/:key           --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).cacheGet-fm (4 handlers)
+[GIN-debug] POST   /api/fifo                 --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).fifo-fm (4 handlers)
 
 ```
 <img width="550px" src="./docs/static/json-rest-crud-costtime.jpg">

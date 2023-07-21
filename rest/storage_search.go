@@ -12,7 +12,7 @@ import (
 func (s *Storage) Search(search Search) *model.Response {
 	resp := model.NewResponse()
 
-	all := s.ReadAll(search.B, search.K).Data.Items
+	all := s.ReadAll(search.B, search.K).Items
 	b, _ := json.Marshal(all)
 
 	jq := gojsonq.New().FromString(string(b))
@@ -56,7 +56,7 @@ func (s *Storage) Search(search Search) *model.Response {
 	} else {
 		jq.SortBy("k", "desc")
 	}
-	resp.Data.Total = len(jq.Get().([]interface{}))
+	resp.Total = len(jq.Get().([]interface{}))
 	// Offset and limit
 	if search.Page != 0 {
 		jq.Offset((search.Page - 1) * search.Size)
@@ -66,7 +66,7 @@ func (s *Storage) Search(search Search) *model.Response {
 		jq.Limit(search.Size)
 	}
 
-	resp.Data.Items = jq.Get().([]interface{})
+	resp.Items = jq.Get().([]interface{})
 
 	return resp
 }
@@ -75,7 +75,7 @@ func (s *Storage) SearchStruct(search Search, obj interface{}) *model.Response {
 
 	rs := s.Search(search)
 
-	for _, item := range rs.Data.Items.([]interface{}) {
+	for _, item := range rs.Items.([]interface{}) {
 		in := item.(map[string]interface{})["v"].(map[string]interface{})
 		jsonbody, _ := json.Marshal(in)
 		json.Unmarshal(jsonbody, &obj)
