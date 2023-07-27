@@ -11,35 +11,42 @@ import (
 )
 
 type JsonStoreRest struct {
-	D *Storage
-	//gin *gin.Context
+	D           *Storage
+	BasicAuth   map[string]string // 使用BasicAuth 如 admin:admin
+	DisableCors bool
 }
 
-func NewJsonStoreRest(dir string, r *gin.Engine) *JsonStoreRest {
+func NewJsonStoreRest(dir string) *JsonStoreRest {
 
-	s := NewStorage(dir)
-
-	s.ConfigHandles(r)
-
-	return &JsonStoreRest{s}
+	return &JsonStoreRest{D: NewStorage(dir)}
 }
 
-func (s *Storage) ConfigHandles(r *gin.Engine) {
+func (s *JsonStoreRest) ConfigHandles(r *gin.Engine) {
+	// 通用中间件处理
+	if s.DisableCors {
+		logrus.Info("REST Json api DisableCors")
+		r.Use(DisableCors())
+	}
+	if s.BasicAuth != nil {
+		logrus.Infof("REST Json api BasicAuth:%v\n", s.BasicAuth)
+		r.Use(gin.BasicAuth(s.BasicAuth))
+	}
+
 	rg := r.Group("/kv")
-	rg.POST("/:b/:k", s.create)
-	rg.GET("/:b/:k", s.readAll)
-	rg.GET("/:b/:k/:kid", s.read)
-	rg.PUT("/:b/:k/:kid", s.update)
-	rg.PUT("/:b/:k/:kid/weight", s.updateWeight)
-	rg.DELETE("/:b/:k/:kid", s.delete)
-	rg.DELETE("/:b/:k", s.deleteAll)
+	rg.POST("/:b/:k", s.D.create)
+	rg.GET("/:b/:k", s.D.readAll)
+	rg.GET("/:b/:k/:kid", s.D.read)
+	rg.PUT("/:b/:k/:kid", s.D.update)
+	rg.PUT("/:b/:k/:kid/weight", s.D.updateWeight)
+	rg.DELETE("/:b/:k/:kid", s.D.delete)
+	rg.DELETE("/:b/:k", s.D.deleteAll)
 	//Search
-	r.GET("/api/search", s.search)
-	r.DELETE("/api/search", s.deleteSearch)
+	r.GET("/api/search", s.D.search)
+	r.DELETE("/api/search", s.D.deleteSearch)
 	//通用缓存
-	r.POST("/api/cache", s.cache)
-	r.GET("/api/cache/:key", s.cacheGet)
-	r.POST("/api/fifo", s.fifo)
+	r.POST("/api/cache", s.D.cache)
+	r.GET("/api/cache/:key", s.D.cacheGet)
+	r.POST("/api/fifo", s.D.fifo)
 }
 
 func (s *Storage) create(c *gin.Context) {
@@ -142,4 +149,19 @@ func (s *Storage) fifo(c *gin.Context) {
 	s.FIFO(data.K, data.V, size)
 
 	c.JSON(http.StatusOK, model.ResponseOne(data))
+}
+
+// Needed in order to disable CORS for local development
+func DisableCors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		method := c.Request.Method
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "*")
+		c.Header("Access-Control-Allow-Headers", "*")
+
+		if method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		}
+		c.Next()
+	}
 }

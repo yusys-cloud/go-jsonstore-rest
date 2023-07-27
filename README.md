@@ -38,7 +38,9 @@ import (
 func main() {
 	r := gin.Default()
 	//REST-APIs-json
-	rest.NewJsonStoreRest("./api-data", r)
+	s := rest.NewJsonStoreRest("./api-data")
+	s.DisableCors = true
+	s.ConfigHandles(r)
 	r.Run(":9991")
 }
 ```

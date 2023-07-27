@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-var url = "http://localhost:9999/api/kv/meta/node"
+var url = "http://localhost:9999/kv/meta/node"
 
 func BenchmarkCreate100(b *testing.B) {
 

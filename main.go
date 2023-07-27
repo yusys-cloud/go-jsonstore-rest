@@ -1,13 +1,12 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-02-02
-//
 package main
 
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
 	"github.com/yusys-cloud/go-jsonstore-rest/rest"
-	"net/http"
+	"strings"
 )
 
 func main() {
@@ -16,28 +15,36 @@ func main() {
 
 	port := flag.String("port", "9999", "--port=9999")
 
+	basicAuth := flag.String("basicAuth", "", "--basicAuth=admin:admin")
+
 	flag.Parse()
 
 	r := gin.Default()
 
-	r.Use(DisableCors())
+	//r.Use(DisableCors())
 
-	rest.NewJsonStoreRest(*path, r)
+	s := rest.NewJsonStoreRest(*path)
+	s.DisableCors = true
+	if *basicAuth != "" {
+		s.BasicAuth = parseStringToMap(*basicAuth)
+	}
+	s.ConfigHandles(r)
 
 	r.Run(":" + *port)
 }
 
-//Needed in order to disable CORS for local development
-func DisableCors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		method := c.Request.Method
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "*")
-		c.Header("Access-Control-Allow-Headers", "*")
+func parseStringToMap(inputStr string) map[string]string {
+	result := make(map[string]string)
 
-		if method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-		}
-		c.Next()
+	// 通过 ":" 符号分割字符串
+	parts := strings.Split(inputStr, ":")
+
+	if len(parts) == 2 {
+		key := parts[0]
+		value := parts[1]
+		// 将键值对添加到结果的 map 中
+		result[key] = value
 	}
+
+	return result
 }
