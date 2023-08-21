@@ -23,18 +23,6 @@ type Storage struct {
 	IdNode  *snowflake.Node
 }
 
-type Search struct {
-	B        string `form:"b"`
-	K        string `form:"k"`
-	Node     string `form:"node"`
-	Key      string `form:"key"`      // Search conditions key
-	Value    string `form:"value"`    // Search conditions value
-	Relation string `form:"relation"` // Search relation,default equal; equal,like
-	ShortBy  string `form:"shortBy"`
-	Page     int    `form:"page"`
-	Size     int    `form:"size"`
-}
-
 const (
 	CACHE_BUCKET string = "meta"
 )
@@ -126,8 +114,17 @@ func (s *Storage) ReadOneRaw(bucket string, key string) []byte {
 // 保存key,value. bucket类似table
 func (s *Storage) Create(bucket string, key string, value interface{}) *model.Data {
 
-	//默认自增ID
-	id := key + ":" + s.IdNode.Generate().String()
+	// 默认自增ID
+	id := key + s.IdNode.Generate().String()
+
+	// 如果有id则执行更新
+	om := value.(map[string]interface{})
+	if om["id"] != nil {
+		rid := om["id"].(string)
+		if s.Read(bucket, rid) != nil {
+			id = rid
+		}
+	}
 
 	err := s.bucket(bucket).Set(id, value)
 	if err != nil {

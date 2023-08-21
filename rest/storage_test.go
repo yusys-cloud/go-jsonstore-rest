@@ -29,7 +29,7 @@ func TestStorage_Create(t *testing.T) {
 }
 
 func TestStorage_ReadAll(t *testing.T) {
-	list := storage.ReadAll(bucket, key).Data.Items.([]model.Data)
+	list := storage.ReadAll(bucket, key).Items.([]model.Data)
 	for _, v := range list {
 		fmt.Println(v.K, v.V)
 	}

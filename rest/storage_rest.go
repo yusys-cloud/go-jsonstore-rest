@@ -47,6 +47,8 @@ func (s *JsonStoreRest) ConfigHandles(r *gin.Engine) {
 	r.POST("/api/cache", s.D.cache)
 	r.GET("/api/cache/:key", s.D.cacheGet)
 	r.POST("/api/fifo", s.D.fifo)
+	// 批量处理
+	r.POST("/api/batch", s.D.batchSave)
 }
 
 func (s *Storage) create(c *gin.Context) {

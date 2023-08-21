@@ -1,9 +1,9 @@
 // Author: yangzq80@gmail.com
 // Date: 2021-03-30
-//
 package jsonstore
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -19,15 +19,15 @@ type Human struct {
 func testFile() *os.File {
 	f, err := ioutil.TempFile(".", "jsonstore")
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 	}
 	return f
 }
 
 func TestOpen(t *testing.T) {
 	f := testFile()
-	defer os.Remove(f.Name())
-	ioutil.WriteFile(f.Name(), []byte(`{"hello":"world"}`), 0644)
+	defer os.RemoveAll(f.Name())
+	os.WriteFile(f.Name(), []byte(`{"hello":"world"}`), 0644)
 	ks, err := Open(f.Name())
 	if err != nil {
 		t.Error(err)
@@ -42,7 +42,7 @@ func TestOpen(t *testing.T) {
 
 func TestGeneral(t *testing.T) {
 	f := testFile()
-	defer os.Remove(f.Name())
+	defer os.RemoveAll(f.Name())
 	ks := new(JSONStore)
 	err := ks.Set("hello", "world")
 	if err != nil {
@@ -93,7 +93,7 @@ func TestGeneral(t *testing.T) {
 
 func TestRegex(t *testing.T) {
 	f := testFile()
-	defer os.Remove(f.Name())
+	defer os.RemoveAll(f.Name())
 	ks := new(JSONStore)
 	ks.Set("hello:1", "world1")
 	ks.Set("hello:2", "world2")
@@ -109,7 +109,7 @@ func TestRegex(t *testing.T) {
 
 func BenchmarkOpen100(b *testing.B) {
 	f := testFile()
-	defer os.Remove(f.Name())
+	defer os.RemoveAll(f.Name())
 	ks := new(JSONStore)
 	for i := 1; i < 100; i++ {
 		ks.Set("hello:"+strconv.Itoa(i), "world"+strconv.Itoa(i))
@@ -121,7 +121,7 @@ func BenchmarkOpen100(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ks, err = Open(f.Name())
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 		}
 	}
 	Save(ks, f.Name())
@@ -129,7 +129,7 @@ func BenchmarkOpen100(b *testing.B) {
 
 func BenchmarkOpen10000(b *testing.B) {
 	f := testFile()
-	defer os.Remove(f.Name())
+	defer os.RemoveAll(f.Name())
 	ks := new(JSONStore)
 	for i := 1; i < 10000; i++ {
 		ks.Set("hello:"+strconv.Itoa(i), "world"+strconv.Itoa(i))
@@ -141,7 +141,7 @@ func BenchmarkOpen10000(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ks, err = Open(f.Name())
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 		}
 	}
 	Save(ks, f.Name())
@@ -151,7 +151,7 @@ func BenchmarkGet(b *testing.B) {
 	ks := new(JSONStore)
 	err := ks.Set("human:1", Human{"Dante", 5.4})
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -167,7 +167,7 @@ func BenchmarkSet(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		err := ks.Set("human:"+strconv.Itoa(i), Human{"Dante", 5.4})
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 		}
 	}
 }

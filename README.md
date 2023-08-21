@@ -45,44 +45,22 @@ func main() {
 }
 ```
 
-## RESTful API
-- key:value store/cache
-``` 
-curl localhost:9999/api/cache -X POST -d '{"k":"k1","v":"hellow world"}'
-```
-``` 
-curl localhost:9999/api/cache/k1
-```
-- First In, First Out (FIFO)
-``` 
-curl 'localhost:9999/api/fifo?size=10' -X POST -d '{"k":"key1","v":"hellow world"}'
-```
-``` 
-curl localhost:9999/kv/meta/key1
-```
-- RESTful JSON DATASTORE
-
-Create
+## Features
+RESTful JSON DATASTORE
+- CRUD
 ``` 
 curl localhost:9999/kv/meta/node -X POST -d '{"ip": "192.168.x.x","name":"redis-n1","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
-```
-Read
-```
 curl localhost:9999/kv/meta/node
-```
-Update
-```
 curl localhost:9999/kv/meta/node/node:1429991523109310464 -X PUT -d '{"ip": "192.168.49.69","name":"redis-n2","idc":"default","lable":"Redis"}' --header "Content-Type: application/json"
-```
-Delete
-```
 curl localhost:9999/kv/meta/node/node:1429991523109310464 -X DELETE
 ```
-Delete All
-```
-curl localhost:9999/kv/meta/node -X DELETE
-```
-Search
+- 批量保存 ```/api/batch?b=b&k=k -X POST -d '[{},{}]' ```
+- 查询字段不为空 ```/api/search?b=datasets&k=train&key=v.declaration&relation=isNotEq&value=null```
+- 删除全部Delete ```/kv/meta/node -X DELETE```
+- First In, First Out (FIFO) ```curl 'localhost:9999/api/fifo?size=10' -X POST -d '{"k":"key1","v":"hellow world"}'```
+- key:value store/cache ```curl localhost:9999/api/cache -X POST -d '{"k":"k1","v":"hellow world"}'```
+
+### Search
 ```
 curl http://localhost:9999/search?b=meta&k=node&key=v.name&value=linux&shortBy=weight,desc&page=1&size=10
 ```
@@ -99,6 +77,8 @@ curl http://localhost:9999/search?b=meta&k=node&key=v.name&value=linux&shortBy=w
 - 参数 key 为json对象的搜索字段名称,需多层json key的完整路径值，如：v.name
 - 参数 relation 为查询关系，默认为equal精准查询，可选like模糊查询
 - 参数 value 为json对象字段的搜索值
+
+## RESTful API
 
 ``` 
 [GIN-debug] POST   /kv/:b/:k                 --> github.com/yusys-cloud/go-jsonstore-rest/rest.(*Storage).create-fm (4 handlers)
