@@ -40,15 +40,17 @@ func (s *JsonStoreRest) ConfigHandles(r *gin.Engine) {
 	rg.PUT("/:b/:k/:kid/weight", s.D.updateWeight)
 	rg.DELETE("/:b/:k/:kid", s.D.delete)
 	rg.DELETE("/:b/:k", s.D.deleteAll)
+
+	kv1 := r.Group("/kvAPI/")
 	//Search
-	r.GET("/api/search", s.D.search)
-	r.DELETE("/api/search", s.D.deleteSearch)
+	kv1.GET("/search", s.D.search)
+	kv1.DELETE("/search", s.D.deleteSearch)
 	//通用缓存
-	r.POST("/api/cache", s.D.cache)
-	r.GET("/api/cache/:key", s.D.cacheGet)
-	r.POST("/api/fifo", s.D.fifo)
+	kv1.POST("/cache", s.D.cache)
+	kv1.GET("/cache/:key", s.D.cacheGet)
+	kv1.POST("/fifo", s.D.fifo)
 	// 批量处理
-	r.POST("/api/batch", s.D.batchSave)
+	kv1.POST("/batch", s.D.batchSave)
 }
 
 func (s *Storage) create(c *gin.Context) {
@@ -86,7 +88,7 @@ func (s *Storage) readAll(c *gin.Context) {
 func (s *Storage) search(c *gin.Context) {
 	var search Search
 	c.ShouldBind(&search)
-	c.JSON(http.StatusOK, s.Search(search).FormatKV())
+	c.JSON(http.StatusOK, s.Search(search))
 }
 
 // 根据搜索内容删除

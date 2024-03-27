@@ -5,14 +5,41 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/yusys-cloud/go-jsonstore-rest/model"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
 var url = "http://localhost:9999/kv/meta/node"
+var jsonStr = []byte(`{"name":"n1","ip":"1.1"}`)
+var jsonAllStr = []byte(`{"name":"n3","ip":"1.2","dc":""}`)
+
+func assertContainsStr(resp *http.Response, str string, t *testing.T) {
+	body, _ := io.ReadAll(resp.Body)
+	is := strings.Contains(string(body), str)
+	fmt.Printf("[%v]contains[%v] [%v]\n", string(body), str, is)
+	if !is {
+		t.Errorf("[%v]not contains[%v] [%v]\n", string(body), str, is)
+	}
+}
+func TestPost(t *testing.T) {
+	resp, _ := http.Post(url, "application/json", bytes.NewBuffer(jsonAllStr))
+	assertContainsStr(resp, "n2", t)
+}
+
+func TestIsNotNull(t *testing.T) {
+	//http.Post(url, "application/json", bytes.NewBuffer(jsonAllStr))
+	resp, _ := http.Get("http://localhost:9999/api/search?b=meta&k=node&key=v.dc&value=nil&relation=isNotEq")
+	assertContainsStr(resp, "cn", t)
+}
+func TestIsNull(t *testing.T) {
+	resp, _ := http.Get("http://localhost:9999/api/search?b=meta&k=node&key=v.dc&value=nil")
+	assertContainsStr(resp, "cn", t)
+}
 
 func TestSaveOrUpdate(t *testing.T) {
 

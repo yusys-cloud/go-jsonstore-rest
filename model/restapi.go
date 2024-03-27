@@ -14,8 +14,7 @@ type Response struct {
 	Items interface{} `json:"items"`
 }
 
-// 将key的值存放到value中id字段，规范前端使用
-func (r *Response) FormatKV() *Response {
+func (r *Response) FormatFields(outFields []string) *Response {
 	switch t := r.Items.(type) {
 	case []interface{}:
 		items := r.Items.([]interface{})
@@ -24,6 +23,14 @@ func (r *Response) FormatKV() *Response {
 			mv := m["v"].(map[string]interface{})
 			mv["id"] = m["k"]
 			items[i] = mv
+			// 如果有指定要返回的字段范围
+			if outFields != nil {
+				mvN := make(map[string]interface{})
+				for _, f := range outFields {
+					mvN[f] = mv[f]
+				}
+				items[i] = mvN
+			}
 		}
 		r.Items = items
 	case interface{}:
@@ -37,6 +44,11 @@ func (r *Response) FormatKV() *Response {
 		r.Items = mv
 	}
 	return r
+}
+
+// 将key的值存放到value中id字段，规范前端使用
+func (r *Response) FormatKV() *Response {
+	return r.FormatFields(nil)
 }
 
 func NewResponse() *Response {

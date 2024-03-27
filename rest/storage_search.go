@@ -19,6 +19,7 @@ type Search struct {
 	ShortBy  string `form:"shortBy"`
 	Page     int    `form:"page"`
 	Size     int    `form:"size"`
+	Fields   string `form:"fields"`
 }
 
 func (s *Storage) Search(search Search) *model.Response {
@@ -31,6 +32,7 @@ func (s *Storage) Search(search Search) *model.Response {
 	if search.Node != "" {
 		jq.From(search.Node)
 	}
+	isQueryNil := false
 	if search.Value != "" && search.Key != "" {
 		//Multiple conditions dynamic search
 		if strings.Contains(search.Key, ",") {
@@ -53,12 +55,23 @@ func (s *Storage) Search(search Search) *model.Response {
 			if strings.Contains(search.Value, "|") {
 				jq.WhereIn(search.Key, strings.Split(search.Value, "|"))
 			} else {
-				if search.Relation == "isNotEq" {
-					jq.WhereNotEqual(search.Key, search.Value)
-				} else if search.Relation == "like" {
+				switch search.Relation {
+				case "isNotEq":
+					if search.Value == "nil" {
+						jq.WhereNotNil(search.Key)
+					} else {
+						jq.WhereNotEqual(search.Key, search.Value)
+					}
+				case "like":
 					jq.WhereContains(search.Key, search.Value)
-				} else {
-					jq.WhereEqual(search.Key, search.Value)
+				default:
+					// 如果查询 nil = 全量 - 非nil
+					if search.Value == "nil" {
+						jq.WhereNotNil(search.Key)
+						isQueryNil = true
+					} else {
+						jq.WhereEqual(search.Key, search.Value)
+					}
 				}
 			}
 		}
@@ -82,6 +95,39 @@ func (s *Storage) Search(search Search) *model.Response {
 
 	resp.Items = jq.Get().([]interface{})
 
+	// 如果查询字段为nil，则通过[全量-非nil]来实现
+	if isQueryNil {
+		resp = substrResult(resp, jq)
+	}
+	var fs []string
+	if search.Fields != "" {
+		fs = strings.Split(search.Fields, ",")
+	}
+	return resp.FormatFields(fs)
+}
+
+// 从全量中排除Response中目标
+func substrResult(resp *model.Response, jq *gojsonq.JSONQ) *model.Response {
+	var result []interface{}
+	if notNilArr, ok := resp.Items.([]interface{}); ok {
+		if allArr, ok := jq.Reset().Get().([]interface{}); ok {
+			for _, a := range allArr {
+				isNil := true
+				// 根据非nil与全量对比出 nil 的
+				for _, n := range notNilArr {
+					if a.(map[string]interface{})["k"].(string) == n.(map[string]interface{})["k"].(string) {
+						isNil = false
+						break
+					}
+				}
+				if isNil {
+					result = append(result, a)
+				}
+			}
+		}
+		resp.Items = result
+		resp.Total = len(result)
+	}
 	return resp
 }
 
